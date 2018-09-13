@@ -1,0 +1,237 @@
+.controlGroup span{
+    margin-left: 1em;
+    }
+    
+    .caratula{
+        width: 100%;
+        margin-top: 5%;
+      }
+      .caratulaReproduciendo{
+        width: 48px;
+        height: 48px;
+      }
+      .hover-red{
+        color: black !important;
+      }
+    
+      .hover-red:hover{
+        color: red !important;
+        -webkit-animation: hover .263s   ;
+        -moz-animation: hover .263s   ;
+        -o-animation: hover .263s   ;
+        animation: hover .263s   ;
+    }
+    
+    .card_35{
+      min-width: 0px !important;
+    };
+    .listaImgX2{
+      width:100%;
+      height:50%;
+    }
+    .listaImgX4{
+      display:inline-block;
+      width:50%;
+      height:50%;
+    }
+    
+    .mainContent{
+      display: flex;
+      justify-content: space-around;
+    
+    }
+    
+    .mainContent .list {
+      width: auto;
+    }
+    
+    .content {
+      width: 100%;
+      max-width: 100%;
+    }
+    
+    #media {
+      flex: 2;
+      height: 100%;
+    }
+    .weekTitle, .wTitle {
+      padding-left: 2em;
+      color: #333;
+    }
+    .mediaList, .wMediaList {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      height: 491px;
+      padding: 2em;
+      padding-bottom: 76px;
+      overflow: scroll;
+    
+    }
+    #songs {
+      flex: 1;
+      min-height: 600px;
+      overflow-y: scroll; 
+    }
+    #songs.background_control {
+      background-color: #ece7e7;
+    }
+    
+    #songs .test_box {
+      background-color: #ece7e7;
+    }
+    .thumb {
+      width: 150px;
+      height: 120px;
+      padding-bottom: 4em;
+    }
+    
+    .thumb .downloadState {
+      position: relative;
+      top: 77%;
+      right: 3%;
+    
+    }
+    
+    .thumb .title {
+      font-size: 12px;
+    }
+    
+    .thumb .img {
+      width: 150px;
+      height: 90px;
+    }
+    
+    .footer {
+        visibility: hidden;
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        height: 76px;
+        width: 100%;
+        background-color: #ece7e7;
+    
+    }
+    .footer img {
+      width: 136px;
+      height: 76px;
+      flex: 1;
+    }
+    
+    .footer .controls {
+      display: flex;
+      flex: 9;
+          align-items: center;
+        justify-content: center;
+    }
+    
+    .footer .controls .pause {
+      display: none;
+    }
+    
+    .footer .controls .play {
+      display: none;
+    }
+    .footer .close {
+      display: flex;
+      flex: 1;
+        align-items: center;
+        justify-content: center;
+    }
+    .content {
+      overflow: hidden;
+    }
+    
+    .findSong input {
+      padding: 1em;
+        text-align: center;
+    }
+    
+    .blink {
+      animation: blink-animation 1s steps(5, start) infinite;
+      -webkit-animation: blink-animation 1s steps(5, start) infinite;
+    }
+    @keyframes blink-animation {
+      to {
+         opacity: 0.5;
+        filter: alpha(opacity=50); 
+      }
+    }
+    @-webkit-keyframes blink-animation {
+      to {
+         opacity: 0.5;
+        filter: alpha(opacity=50); 
+      }
+    }
+    
+    /* DISPLAY CSS */
+    @font-face {
+      font-family: 'Roboto';
+      src: url('./fonts/Roboto-Regular.ttf');
+      font-weight: normal;
+      font-style: normal;
+    }
+    
+    html, body {
+        height: 100%;
+        font-family: 'Roboto', sans-serif;    
+    }
+    body {
+        margin: 0;
+    }
+    
+    .display {
+      background: url('/images/background.png');
+      background-size: 100% auto;
+    }
+    
+    .yearText {
+      font-size: 300%;
+      color: #fff;
+      width: 50%;
+    }
+    
+    .flex-center-container {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+        display: -webkit-box;
+        display: -moz-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .row {
+        width: auto;
+    }
+    
+    .centerItem {
+        text-align: center;
+        margin: 0 auto;
+    }
+    
+    .videoContainer {
+      display: none;
+    }
+    .videoContainer {
+      width: 100%;
+      height: 100%;
+    }
+    .videoContainer video {
+      width: 100%;
+      height: 100%;
+    
+    }
+    .audioContainer {
+      display: none;
+    }
+    
+    .audioContainer audio {
+      width: 100%;
+      height: 100%;
+    }
+    .imageContainer {
+      display: none;
+    }

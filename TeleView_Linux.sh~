@@ -1,0 +1,11 @@
+#!/bin/bash
+echo Cerraremos Google Chrome
+
+pkill chrome
+
+google-chrome --args --disable-web-security http://localhost:3000 --start-fullscreen --disable-background-mode --disable-sync-synced-notifications
+
+
+echo Abrimos Chrome en modo Promiscuo
+
+nodejs bin/www
