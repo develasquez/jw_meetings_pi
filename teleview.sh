@@ -11,4 +11,4 @@
 ### END INIT INFO
 
 pm2 kill && 
-pm2 start /opt/node/TeleView/bin/www --name=teleview
+pm2 start /opt/node/jw_meetings_pi/bin/www --name=jw

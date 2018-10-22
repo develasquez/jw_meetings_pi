@@ -5,7 +5,7 @@ mkdir -p ~/.config/autostart/
 cat >~/.config/autostart/autoChromium.desktop << EOL
 [Desktop Entry]
 Type=Application
-Exec=/usr/bin/chromium-browser --noerrdialogs --disable-session-crashed-bubble --disable-infobars --kiosk http://www.website.com
+Exec=/usr/bin/chromium-browser --noerrdialogs --disable-session-crashed-bubble --disable-infobars --kiosk http://localhost:3001
 Hidden=false
 X-GNOME-Autostart-enabled=true
 Name[en_US]=AutoChromium
