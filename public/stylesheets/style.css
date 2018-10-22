@@ -63,15 +63,21 @@
       justify-content: space-around;
       flex-wrap: wrap;
       height: 491px;
-      padding: 2em;
       padding-bottom: 76px;
       overflow: scroll;
     
+    }
+    .tabBar {
+      font-size: 80%
+    }
+    .tabBar .tabElement {
+      top: 3.8em;
     }
     #songs {
       flex: 1;
       min-height: 600px;
       overflow-y: scroll; 
+      width: 100%;
     }
     #songs.background_control {
       background-color: #ece7e7;
@@ -85,6 +91,14 @@
       height: 120px;
       padding-bottom: 4em;
     }
+
+    .thumb:last-child {
+      margin-bottom: 7em;
+    }
+
+    #songs li:last-child {
+      margin-bottom: 10em;
+    }
     
     .thumb .downloadState {
       position: relative;
@@ -92,6 +106,7 @@
       right: 3%;
     
     }
+
     
     .thumb .title {
       font-size: 12px;
@@ -101,7 +116,20 @@
       width: 150px;
       height: 90px;
     }
-    
+    .microPlay {
+      display: inline-block;
+      width: 40px;
+      background: #000;
+      height: 1em;
+    }
+
+    .microPlay img {
+      width: 10px;
+      margin-left: 1em;
+      padding-bottom: 1px;
+    }
+
+
     .footer {
         visibility: hidden;
         display: flex;
@@ -113,14 +141,14 @@
     
     }
     .footer img {
-      width: 136px;
-      height: 76px;
+      width: 20%;
+      height: 110%;
       flex: 1;
     }
     
     .footer .controls {
       display: flex;
-      flex: 9;
+      flex: 3;
           align-items: center;
         justify-content: center;
     }
@@ -183,6 +211,8 @@
     .display {
       background: url('/images/background.png');
       background-size: 100% auto;
+      background-repeat: no-repeat;
+      background-color: #000;
     }
     
     .yearText {
@@ -234,4 +264,11 @@
     }
     .imageContainer {
       display: none;
+    }
+
+    @media (min-width: 1024px)  {
+      .mediaList, .wMediaList {
+        padding: 2em; 
+      }
+
     }

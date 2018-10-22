@@ -595,43 +595,44 @@ monomer = {
 
 	        var selectorActivePage = $(activePage).length > 0 ? activePage + " > " : "";
 
-	        if($(selectorActivePage +  ".header").height() > 0){
+	        if($(selectorActivePage +  " .header").height() > 0){
                 _headerHeight= em * 3 + 14;
 			}
 			_header={
-	        	width:$(selectorActivePage +".header").width() || 0,
+	        	width:$(selectorActivePage +" .header").width() || 0,
 	        	height:_headerHeight
             }
 
-            if($(selectorActivePage.replace(">","") +".tabBar").height() > 0){
+            if($(selectorActivePage.replace(">","") +" .tabBar").height() > 0){
                 _tabBarHeight= em * 3 +14;
 			}
 
             _tabBar={
-	        	width:$(selectorActivePage +".tabBar").width() || 0,
+	        	width:$(selectorActivePage +" .tabBar").width() || 0,
 	        	height: _tabBarHeight
             }
 
-            if($(selectorActivePage +".footer").height() > 0){
+            if($(selectorActivePage +" .footer").height() > 0){
                 _footerHeight= em * 3 + 14;
 			}
 			
 	        _footer={
-	        	width:$(selectorActivePage +".footer").width() || 0,
+	        	width:$(selectorActivePage +" .footer").width() || 0,
 	        	height:_footerHeight
             }
             _content={
 	        	width :window.innerWidth,
-	            height :window.innerHeight - _header.height - _footer.height - _tabBar.height 
+	            height :window.innerHeight - _header.height 
 	        }
 
 
-	        $("body").css({width:"100%"}).height(_window.height);
+			$("body").css({width:"100%"}).height(_window.height);
+
 			$(".content").height(_content.height );
 			$(".leftMenu").height(_content.height + _header.height);
 			//$(activePage).height(_content.height + _header.height + _footer.height );
 	    	
-	    	_availHeight= window.innerHeight - _header.height - _footer.height;
+	    	_availHeight= window.innerHeight - _header.height ;
 			$(".aspect_16_9,.aspect_3_2,.aspect_4_3,.aspect_1_1,.aspect_Full").css("max-height",_availHeight +  "px" );
 	    	$(".centred-verticaly").each(function (i,e) {
 	    		if($(e).height() < $(e).parent().height() ){

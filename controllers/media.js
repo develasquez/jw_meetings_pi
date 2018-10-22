@@ -9,7 +9,7 @@ var _ = require("lodash");
 
 
 var baseUrl = "https://wol.jw.org";
-var guidesUrl = "https://wol.jw.org/es/wol/lv/r4/lp-s/0/47497";
+var guidesUrl = "https://wol.jw.org/es/wol/lv/r4/lp-s/0/47536";
 var songsListUrl = "https://apps.jw.org/GETPUBMEDIALINKS?output=html&pub=sjjm&fileformat=M4V%2CMP4%2C3GP&alllangs=1&langwritten=S&txtCMSLang=S";
 var apiFinder = "https://data.jw-api.org/mediator/finder?item=";
 var apiMedi = "https://data.jw-api.org/mediator/v1/media-items/S/";

@@ -26,6 +26,12 @@ SocketServer = {
       socket.on("downloadEnded", function (media) {
         io.emit("downloadEnded",media)
       })
+      socket.on("getDownloads", function () {
+        io.emit("getDownloads")
+      })
+      socket.on("setDownloads", function (downloads) {
+        io.emit("setDownloads",downloads)
+      })
     });
   }
 }

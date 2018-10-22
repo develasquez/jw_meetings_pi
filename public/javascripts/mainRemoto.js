@@ -8,55 +8,59 @@ var currentWeek = "";
 
 
 var main = {
-    init: function() {
+    init: function () {
         socket = io();
-        Media.getCurrentWeek().then(function(thisWeek) {
-            currentWeek = thisWeek.name;
-            main.setCurrentWeek();
-            Media.getWatchtower(thisWeek).then(function(media) {
-                main.getWatchtowerMedia(media);
-            });
-        }).catch(function(err){
-            
-            console.log(err);
-        });
-        //main.getWeeks();
         main.setEvents();
-        main.getSongs();
-        setTimeout(function() {
-            $("#songs").height($(".content").height());
-        }, 1000);
+
+        socket.emit("getDownloads");
+        socket.on("setDownloads", function (files) {
+            main.getSongs();
+            Media.files = files || [];
+            localStorage.setItem("files", Media.files)
+            main.getWeeks().then(function (weeks) {
+                Media.getCurrentWeek().then(function (thisWeek) {
+                    main.setCurrentWeek(thisWeek.name);
+                    Media.getWatchtower(thisWeek).then(function (media) {
+                        main.getWatchtowerMedia(media);
+                    });
+                }).catch(function (err) {
+
+                    console.log(err);
+                });
+            });
+
+        });
     },
-    setEvents: function() {
-        $(".expandWeeks").on("click", function() {
+    setEvents: function () {
+        $(".expandWeeks").on("click", function () {
             monomer.showDialog("#popupWeeks");
         });
-        window.onresize = function(event) {
+        window.onresize = function (event) {
             $("#songs").height($(".content").height());
         };
-        $(".findSong input").on("keyup", function(evt) {
+        $(".findSong input").on("keyup", function (evt) {
             $("#songs li").show();
             if ($(this).val().length > 0) {
                 $("#songs li:not(:contains('" + $(this).val() + "'))").hide();
             }
 
         });
-        $(".play").on("click", function() {
+        $(".play").on("click", function () {
             $(".play").hide();
             $(".pause").show();
             socket.emit("controls", {
                 "action": "play"
-            }); 
+            });
         });
-        $(".pause").on("click", function() {
+        $(".pause").on("click", function () {
             $(".pause").hide();
             $(".play").show();
             socket.emit("controls", {
                 "action": "pause"
             });
         });
-        $(".close").on("click", function() {
-            
+        $(".close").on("click", function () {
+
             socket.emit("controls", {
                 "action": "exit"
             });
@@ -66,78 +70,68 @@ var main = {
             });
 
         });
-        $(".fullScreen").on("click",function(){
+        $(".fullScreen").on("click", function () {
             socket.emit("fullscreen");
         });
     },
-    getWeeks: function() {
-        monomer.showLoading();
-        Media.getGuides().then(function(data) {
-
-            console.log("Guides Ready")
-            if (!localStorage.getItem("guides")) {
+    getWeeks: function () {
+        return new Promise(function (resolve, reject) {
+            monomer.showLoading();
+            Media.getGuides().then(function (data) {
                 localStorage.setItem("guides", data);
-            } else if (localStorage.getItem("guides").length = data.length) {
-                if (localStorage.getItem("guides")) {
-                    $.each(localStorage.getItem("weeks"), _.bind(main.setWeeks, this));
-                    monomer.hideLoading();
-                } else {
-                    return;
-                }
-            }
-            var weeks = [];
-            $.each(data, function(i, e) {
-                weeks.push(Media.getWeeks(baseUrl + e.url));
-            });
-
-            Promise.all(weeks).then(function(weeksData) {
-                weeksData = _.flatten(_.compact(weeksData));
-                if (!localStorage.getItem("weeks")) {
+                var weeks = [];
+                $.each(data, function (i, e) {
+                    weeks.push(Media.getWeeks(baseUrl + e.url));
+                });
+                Promise.all(weeks).then(function (weeksData) {
+                    weeksData = _.flatten(_.compact(weeksData));
                     localStorage.setItem("weeks", weeksData);
-                } else if (localStorage.getItem("weeks").length = weeksData.length) {
-                    return
-                }
-                $.each(weeksData, _.bind(main.setWeeks, this));
-                monomer.hideLoading();
-            })
+                    main.renderWeeks();
+                    monomer.hideLoading();
+                    resolve(weeksData);
+                })
+            });
         });
     },
-    setWeeks: function(i, e) {
+    renderWeeks: function () {
+        $.each(localStorage.getItem("weeks"), _.bind(main.setWeeks, this));
+    },
+    setWeeks: function (i, e) {
         $(".weeks")
             .append($("<li>")
                 .addClass("week")
                 .data("week", e)
                 .text(e.week)
-                .on("click", function() {
+                .on("click", function () {
                     monomer.hideDialog("#popupWeeks");
                     main.getMedia($(this).data("week"))
                 })
             );
     },
-    setCurrentWeek: function() {
+    setCurrentWeek: function (currentWeek) {
         var weeks = localStorage.getItem("weeks");
-        main.getMedia(_.filter(weeks, function(w) {
+        main.getMedia(_.filter(weeks, function (w) {
             return w.week == currentWeek
         })[0])
 
     },
-    fnDownload: function(evt) {
-        var mediaObj = $(this).data("media");
+    fnDownload: function (evt) {
 
+        var mediaObj = $(evt.currentTarget).data("media");
         if (mediaObj.url.indexOf("http") > -1) {
-            $(this).find(".downloadState").addClass("blink")
-            Media.download(mediaObj).then((function(data) {
+            $(evt.currentTarget).find(".downloadState").addClass("blink")
+            Media.download(mediaObj).then((function (data) {
                 $(this).find(".downloadState")
                     .removeClass("icon-cloud")
-                    .data("media", data,mediaObj);
-                    localStorage.setItem("files", data.files);   
-                    socket.emit("files",data.files);
+                    .data("media", data, mediaObj);
+                localStorage.setItem("files", data.files);
+                socket.emit("files", data.files);
             }).bind(evt.currentTarget));
         } else {
             main.fnRender(evt);
         }
     },
-    fnRender: function(evt) {
+    fnRender: function (evt) {
 
         var mediaObj = $(evt.currentTarget).data("media");
         $(".miniature").attr("src", mediaObj.image || mediaObj.url.replace("\\", "\\\\"));
@@ -145,77 +139,91 @@ var main = {
             "visibility": "visible",
             "margin-top": "-76px"
         });
-        if("AUDIOVIDEO".indexOf(mediaObj.type) > -1){
+        if ("AUDIOVIDEO".indexOf(mediaObj.type) > -1) {
             $(".pause").show();
             $(".play").hide();
         }
         socket.emit("media", mediaObj);
 
     },
-    getMedia: function(week) {
+    getMedia: function (week) {
         monomer.showLoading();
         $(".weekTitle").text(week.week);
-        Media.getMedia(baseUrl + week.url).then(function(data) {
+        Media.getMedia(baseUrl + week.url).then(function (data) {
 
             monomer.hideLoading();
             $(".mediaList").html("");
-            $.each(data, function(i, e) {
+            data = _.uniqBy(data, 'url');
+            $.each(data, function (i, e) {
 
                 var mediaFile = e;
-                Media.readFile(mediaFile).then(function(file) {
-
+                Media.readFile(mediaFile).then(function (file) {
                     if (file) {
                         mediaFile.local = true;
                         mediaFile.url = file.localFilename;
-                        $(".mediaList").append($(listHTML(mediaFile)).data("media", mediaFile).on("click", main.fnRender));
-                    } else {
-                        $(".mediaList").append($(listHTML(mediaFile)).data("media", mediaFile).on("click", main.fnDownload));
                     }
+                    $(".mediaList").append($(listHTML(mediaFile)).data("media", mediaFile).on("click", main.display));
                 });
+
             });
         });
     },
-    getWatchtowerMedia: function(data) {
-        monomer.showLoading();
+    display: function (e) {
+        var mediaFile = $(e.currentTarget).data("media");
+        Media.readFile(mediaFile).then(function (file) {
+            if (file) {
+                mediaFile.local = true;
+                mediaFile.url = file.localFilename;
+                main.fnRender(e);
+            } else {
+                main.fnDownload(e);
+            }
+        }).catch(function (err) {
+            console.log(err);
+        });
+    },
+    getWatchtowerMedia: function (data) {
         $(".wTitle").text(currentWeek.wName);
         $(".wMediaList").html("");
-        $.each(data, function(i, e) {
+        $.each(data, function (i, e) {
 
             var mediaFile = e;
-            Media.readFile(mediaFile).then(function(file) {
+            Media.readFile(mediaFile).then(function (file) {
 
                 if (file) {
                     mediaFile.local = true;
                     mediaFile.url = file.localFilename;
-                    $(".wMediaList").append($(listHTML(mediaFile)).data("media", mediaFile).on("click", main.fnRender));
-                } else {
-                    $(".wMediaList").append($(listHTML(mediaFile)).data("media", mediaFile).on("click", main.fnDownload));
                 }
+                $(".wMediaList").append($(listHTML(mediaFile)).data("media", mediaFile).on("click", main.display));
+
             });
         });
 
     },
-    getSongs: function() {
-        Media.getSongs().then(function(data) {
-            $.each(data, function(i, e) {
+    getSongs: function () {
+        Media.getSongs().then(function (data) {
+            $("#songs").html();
+            $.each(data, function (i, e) {
                 var song = e;
-                Media.readFile(song).then(function(file) {
+                if(!song.name){
+                    return;
+                }
+                Media.readFile(song).then(function (file) {
                     if (file) {
                         song.local = true;
                         song.url = file.localFilename;
-                        $("#songs").append($(songHTML(song)).data("media", song).on("click", main.fnRender));
-                    } else {
-                        $("#songs").append($(songHTML(song)).data("media", song).on("click", main.fnDownload));
                     }
+                        $("#songs").append($(songHTML(song)).data("media", song).on("click", main.display));
+                   
                 })
             });
-
+            $("#songs").height($(".content").height());
         });
 
     }
 };
 
-var songHTML = function(data) {
+var songHTML = function (data) {
     return [
         '<li>',
         '<div>',
@@ -228,19 +236,20 @@ var songHTML = function(data) {
         '<h3>' + data.name + '</h3>',
         '</div>',
         data.local ? '' :
-        '<span class="downloadState button-right icon-cloud icon-1x icon-grey">',
+            '<span class="downloadState button-right icon-cloud icon-1x icon-grey">',
         '</span>',
         '</div>',
         '</li>',
     ].join("\n");
 };
 
-var listHTML = function(data) {
+var listHTML = function (data) {
     var image = data.image || data.url;
 
     return [
         '<div class="thumb">',
         '<div class="img" style="background: url(\'' + image + '\') center center / auto 100% no-repeat #000;"> ',
+        data.type === 'VIDEO' ? '<div class="microPlay"><img src="/images/play.png" /></div>' : '',
         data.local ? '' : '<span class="downloadState button-right icon-cloud icon-1x icon-grey"></span>',
         '</div>',
         '<div>',
@@ -248,5 +257,5 @@ var listHTML = function(data) {
     ].join("\n");
 };
 
-
 $(main.init);
+

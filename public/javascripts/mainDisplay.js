@@ -3,7 +3,7 @@ var socket;
 $(function() {
     socket = io();
     socket.on('files', function(files) {
-        localStorage.setItem("files", files);
+		localStorage.setItem("files", files);
     });
     
 	var video = document.getElementById('video');
@@ -21,6 +21,9 @@ $(function() {
 		$(".imageContainer").hide();
 		$(".audioContainer").hide();
 	}
+	socket.on("getDownloads", function() {
+		socket.emit("setDownloads", localStorage.getItem("files"));
+	})
 	socket.on("controls", function(control) {
 		var actions = {
 			play: function() {
