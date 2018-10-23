@@ -9,6 +9,11 @@ router.get('/', function (req, res, next) {
   });
 });
 
+router.get('/health', function (req, res, next) {
+  
+  res.send({ok:200});
+});
+
 router.get('/remoto', function (req, res, next) {
   res.set('Cache-Control', 'public, max-age=31557600');
   res.render('remote', {title: 'Control Remoto'});
