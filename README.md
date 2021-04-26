@@ -39,5 +39,5 @@ ifconfig
 6. En tu celular debes estar conectado a la misma red del PC 
 La direccion ip que obtengas ingresala en el nacegador del Celular
 
-http://<La IP>/remoto
+http://La IP/remoto
 
