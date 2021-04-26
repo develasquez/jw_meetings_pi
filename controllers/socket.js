@@ -21,12 +21,14 @@ SocketServer = {
         io.emit("fullscreen")
       })
       socket.on("startDownload", function (media) {
+        
         io.emit("startDownload",media)
       })
       socket.on("downloadEnded", function (media) {
         io.emit("downloadEnded",media)
       })
       socket.on("getDownloads", function () {
+        console.log("Start");
         io.emit("getDownloads")
       })
       socket.on("setDownloads", function (downloads) {

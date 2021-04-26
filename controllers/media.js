@@ -5,13 +5,14 @@ var path = require('path');
 var fs = require('fs');
 var https = require('https');
 var _ = require("lodash");
+var querystring = require("querystring");
 
 
 
 var baseUrl = "https://wol.jw.org";
-var guidesUrl = "https://wol.jw.org/es/wol/lv/r4/lp-s/0/47536";
-var songsListUrl = "https://apps.jw.org/GETPUBMEDIALINKS?output=html&pub=sjjm&fileformat=M4V%2CMP4%2C3GP&alllangs=1&langwritten=S&txtCMSLang=S";
-var apiFinder = "https://data.jw-api.org/mediator/finder?item=";
+var guidesUrl = process.env.GUIDESURL;
+var songsListUrl = "https://b.jw-cdn.org/apis/mediator/v1/categories/S/VODSJJMeetings?detailed=1&clientType=www";
+var apiFinder = "https://data.jw-api.org/mediator/finder?item=sjjm_S_127_r720P.mp4";
 var apiMedi = "https://data.jw-api.org/mediator/v1/media-items/S/";
 var weekProgramUrl = "https://wol.jw.org/es/wol/dt/r4/lp-s/";
 
@@ -106,9 +107,7 @@ var Media = {
 					$$("article .pubRefs a").each(function (ind, e) {
 
 						sources.push({
-							url: _.filter(songsList, function (s) {
-								return s.number == parseInt(($$(e).text()).match(/[0-9]{1,3}/))
-							})[0].url,
+							url: parseInt(($$(e).text()).match(/[0-9]{1,3}/)),
 							image: "https://assetsnffrgf-a.akamaihd.net/assets/a/sjjm/univ/wpub/sjjm_univ_lg.jpg",
 							name: `Cántico ${($$(e).text()).match(/[0-9]{1,3}/)}`,
 							type: "VIDEO"
@@ -123,6 +122,7 @@ var Media = {
 		});
 	},
 	getCurrentWeek: function () {
+		console.log("getCurrentWeek")
 		return new Promise(function (resolve, reject) {
 
 			var date = new Date();
@@ -133,8 +133,9 @@ var Media = {
 				try {
 
 					var $ = cheerio.load(body);
+					console.log("Titulo",  $("#p1 strong").text());
 					resolve({
-						name: $("[class*='pub-mwb'] .docTitle").text(),
+						name: $("#p1 strong").text(),
 						wUrl: $("[class*='pub-w'] .it").attr("href"),
 						wName: $("[class*='pub-w'] .it").text()
 					});
@@ -152,32 +153,37 @@ var Media = {
 			request(songsListUrl, function (err, xhr, body) {
 				try {
 
+					
+					var songs = JSON.parse(body).category.media;
+					
+					songs.forEach(function ( e) {
 
-					var $ = cheerio.load(body);
-					$(".aVideoURL").each(function (i, e) {
-						var number = $(e).parent("td").text().split(".")[0].trim().replace("&nbsp;");
-						var name = $(e).parent("td").text().split(".")[1];
-						const mediaLink = $(e).parents("tr").find(".linkDnld[href*='720']").attr("href");
+						var number = e.title.replace(/[^0-9]+/g,'');
+						var name = 'Canción ' + number;
+						console.log()
+						const mediaLink = _.find(e.files,(c) => c.label=='720p').progressiveDownloadURL
 						songsList.push({
-							url: mediaLink.indexOf("http") > -1 ? mediaLink : `${baseUrl}${mediaLink}`,
+							url: mediaLink,
 							name: name,
 							number: number,
 							type: "VIDEO"
 						});
 					});
+					
 					resolve(songsList);
 				} catch (ex) {
-					console.log("Can't get songs");
+					console.log("Can't get songs", ex);
 					resolve(null);
 				}
 			});
 		});
 	},
 	getGuides: function () {
+
 		return new Promise(function (resolve, reject) {
-
+			console.log("1 get guides");
 			request(guidesUrl, function (err, xhr, body) {
-
+				console.log("2 guides");
 				try {
 					var $ = cheerio.load(body);
 					var guides = [];
@@ -198,24 +204,31 @@ var Media = {
 	},
 	getWeeks: function (monthUrl) {
 		return new Promise(function (resolve, reject) {
-
-			request(monthUrl, function (err, xhr, body) {
-
+			console.log(monthUrl);
+			request(encodeURI (monthUrl) , function (err, xhr, body) {
+		
 				try {
 					var $ = cheerio.load(body);
 					var weeks = [];
+					
 					$(".row.card a").each(function (i, e) {
-						if ($(e).find("span.title").text().match(/(([1-9]{1,2})+?(-|[a-z ]{1,20})+?([1-9]{1,2})+?)/)) {
-							weeks.push({
+						console.log("Each");
+						console.log($(e).find(".cardTitleBlock .cardSingleLine").text().trim());
+
+						if ($(e).find(".cardTitleBlock .cardSingleLine").text().trim().match(/(([0-9]{1,2})+(-|[a-z ]{1,20})+([0-9]{1,2})+(-|[a-z ]{1,20}))/)) {
+							console.log("if");
+							var week = {
 								url: $(e).attr("href") || "NULL",
-								week: $(e).find("span.title").text() || "",
+								week: $(e).find(".cardLine1").text() || "",
 								image: $(e).find(".thumbnail").attr("src") || "NULL"
-							});
+							};
+							console.log(week);
+							weeks.push(week);
 						}
 					});
 					resolve(weeks);
 				} catch (ex) {
-
+					console.log(ex);
 					resolve(null);
 				}
 			});
@@ -227,7 +240,7 @@ var Media = {
 				try {
 					var $ = cheerio.load(body);
 					var urlMedia = [];
-					$(".su a:not(.b):not(.fn), .sw a:not(.b):not(.fn)").each(function (order, e) {
+					$(".so a:not(.b), .sw a:not(.b)").each(function (order, e) {
 
 						urlMedia.push(new Promise(function (resolveMedia, reject) {
 							let mUrl;
@@ -246,7 +259,7 @@ var Media = {
 							}
 
 							request(mUrl, function (err, xhr, bodyArticle) {
-
+								console.log(mUrl)
 								try {
 									if (err) {
 
@@ -274,9 +287,11 @@ var Media = {
 										});
 										return;
 									} else {
+										console.log("else");
 										$$ = cheerio.load(bodyArticle);
 										var sources = [];
 										$$("figure img, [src*='.mp4'], [src*='.mp3']").each(function (ind, el) {
+											console.log(ind)
 											const mediaLink = $$(el).attr("src") || $$(el).attr("href");
 											var url = mediaLink.indexOf("http") > -1 ? mediaLink : `${baseUrl}${mediaLink}`;
 											sources.push({
@@ -341,5 +356,5 @@ var getParams = function (url) {
 	}
 	return vars;
 }
-Media.getSongs();
+//Media.getSongs();
 module.exports = Media;
