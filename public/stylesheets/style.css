@@ -60,7 +60,7 @@
       padding-left: 2em;
       color: #333;
     }
-    .mediaList, .wMediaList {
+    .mediaList, .wMediaList, .uploadList {
       display: flex;
       justify-content: space-around;
       flex-wrap: wrap;
@@ -215,6 +215,9 @@
       background-size: 100% auto;
       background-repeat: no-repeat;
       background-color: #000;
+      height: 100%;
+      width: 100%;
+      max-width: 100%;
     }
     
     .yearText {

@@ -1,6 +1,26 @@
 var player;
 var socket;
-
+if (typeof document.cancelFullScreen != 'undefined' && document.fullScreenEnabled === true) {
+    // mozilla proposal
+    element.requestFullScreen();
+    document.cancelFullScreen(); 
+  
+    // Webkit (works in Safari and Chrome Canary)
+    element.webkitRequestFullScreen(); 
+    document.webkitCancelFullScreen(); 
+  
+    // Firefox (works in nightly)
+    element.mozRequestFullScreen();
+    document.mozCancelFullScreen(); 
+  
+    // W3C Proposal
+    element.requestFullscreen();
+    document.exitFullscreen();
+    setInterval(() => {
+        $(".display").width(screen.width);
+        $(".display").height(screen.height);
+    },100)
+  }
 //var Promise = require("bluebird");
 //var _ = require("lodash");
 var baseUrl = "https://wol.jw.org";
@@ -9,31 +29,41 @@ var currentWeek = "";
 
 var main = {
     init: function () {
+        
+        main.getSongs();
         socket = io();
         main.setEvents();
-
+        console.log("getDownload");
         socket.emit("getDownloads");
+        main.getWeeks().then(function (weeks) {
+            console.log(weeks);
+        });
+        Media.getCurrentWeek().then(function (thisWeek) {
+            main.setCurrentWeek(thisWeek.name);
+            Media.getWatchtower(thisWeek).then(function (media) {
+                console.log("Atalaya ", media);
+                main.getWatchtowerMedia(media);
+            });
+        }).catch(function (err) {
+
+            console.log(err);
+        });
         socket.on("setDownloads", function (files) {
-            main.getSongs();
+            console.log("setDownload");
+            
             Media.files = files || [];
             localStorage.setItem("files", Media.files)
-            main.getWeeks().then(function (weeks) {
-                Media.getCurrentWeek().then(function (thisWeek) {
-                    main.setCurrentWeek(thisWeek.name);
-                    Media.getWatchtower(thisWeek).then(function (media) {
-                        main.getWatchtowerMedia(media);
-                    });
-                }).catch(function (err) {
-
-                    console.log(err);
-                });
-            });
+            
 
         });
+        main.setUploadItems();
     },
     setEvents: function () {
         $(".expandWeeks").on("click", function () {
             monomer.showDialog("#popupWeeks");
+        });
+        $(".upload").on("click", function () {
+            monomer.showDialog("#popupUpload");
         });
         window.onresize = function (event) {
             $("#songs").height($(".content").height());
@@ -84,6 +114,8 @@ var main = {
                     weeks.push(Media.getWeeks(baseUrl + e.url));
                 });
                 Promise.all(weeks).then(function (weeksData) {
+                    console.log("All weeks");
+                    console.log(weeksData);
                     weeksData = _.flatten(_.compact(weeksData));
                     localStorage.setItem("weeks", weeksData);
                     main.renderWeeks();
@@ -110,9 +142,11 @@ var main = {
     },
     setCurrentWeek: function (currentWeek) {
         var weeks = localStorage.getItem("weeks");
-        main.getMedia(_.filter(weeks, function (w) {
-            return w.week == currentWeek
-        })[0])
+
+        var w = _.filter(weeks, function (w) {
+            return w.week.trim() == currentWeek.trim()
+        })[0];
+        main.getMedia(w);
 
     },
     fnDownload: function (evt) {
@@ -186,8 +220,15 @@ var main = {
         $(".wTitle").text(currentWeek.wName);
         $(".wMediaList").html("");
         $.each(data, function (i, e) {
-
+            
             var mediaFile = e;
+            if(typeof(mediaFile.url) == "number" ) {
+                var song = _.filter(localStorage.getItem("songs"), (s) => 
+                    s.url.match(mediaFile.url+ "_r720P")
+                )[0];
+                mediaFile.url = song.url;
+            }
+
             Media.readFile(mediaFile).then(function (file) {
 
                 if (file) {
@@ -200,8 +241,37 @@ var main = {
         });
 
     },
+    uploadMedia: function() {
+        var uploads = localStorage.getItem("uploads") || [];
+        uploads.push({
+            url: $("#txtUrlUpload").val(),
+            image: $("#txtImgUpload").val(),
+            name: $("#txtNameUpload").val(),
+            type: $("#txtTypeUpload").val(),
+        });
+        localStorage.setItem("uploads", uploads);
+        main.setUploadItems();
+        monomer.hideDialog("#popupUpload");
+    },
+    setUploadItems: function () {
+        var uploads = localStorage.getItem("uploads");
+        $(".uploadList").html("");
+        $.each(uploads, function (i, e) {  
+            var mediaFile = e;
+            Media.readFile(mediaFile).then(function (file) {
+                if (file) {
+                    mediaFile.local = true;
+                    mediaFile.url = file.localFilename;
+                }
+                $(".uploadList").append($(listHTML(mediaFile)).data("media", mediaFile).on("click", main.display));
+
+            });
+        });
+
+    },
     getSongs: function () {
         Media.getSongs().then(function (data) {
+            localStorage.setItem("songs", data);
             $("#songs").html();
             $.each(data, function (i, e) {
                 var song = e;

@@ -21,11 +21,30 @@ html
       .header
         h2.color-light-blue.center Semanas
       ul.weeks.list.background_control.divider
+    #popupUpload.modal-dialog.fade.card.background_control.z-d3
+      .header
+        h2.color-light-blue.center Cargar Medio
+      input(type="text", id="txtNameUpload")
+      label(for="txtNameUpload")
+        | Nombre
+      input(type="text", id="txtUrlUpload")
+      label(for="txtUrlUpload")
+        | Url media
+      input(type="text", id="txtImgUpload")
+      label(for="txtImgUpload")
+        | Image media
+      input(type="text", id="txtTypeUpload")
+      label(for="txtTypeUpload")
+        | Type media
+      br
+      button.center.raised-button.purple.color-white(onClick="main.uploadMedia();")
+        | Subir
     #meetings.page
       .header.purple.z-d1
         h3.color-white JW Reuniones
         .button-right.controlGroup
           span.expandWeeks.icon-calendar.icon-1x.icon-white
+          span.upload.icon-upload.icon-1x.icon-white
       .content
         .mainContent
           #media
@@ -35,6 +54,8 @@ html
                   span.onTablet.onDesktop VIDA Y MIN.
                 li.tab.color-white
                   span.onTablet.onDesktop EST. ATALAYA
+                li.tab.color-white
+                  span.onTablet.onDesktop SUBIDAS
                 li.tab.color-white
                   span.onTablet.onDesktop CANTICOS
                 .selectedTab.white  
@@ -46,6 +67,10 @@ html
                 div
                   h3.wTitle
                   .wMediaList
+              .tabElement
+                div
+                  h3.wTitle
+                  .uploadList
               .tabElement
                 div
                   ul#songs.list.advanced.divider.background_control
