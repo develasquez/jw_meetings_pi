@@ -1,15 +1,17 @@
 var player;
 var socket;
 $(function() {
-	$(".display").dblclick(function(){
+
+	function fullscreen(){
 		if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-  } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    }
-  }
-	});
+			document.documentElement.requestFullscreen();
+		} else {
+		  if (document.exitFullscreen) {
+			document.exitFullscreen();
+		  }
+		}
+	}
+	$(".display").dblclick(fullscreen);
     socket = io();
     socket.on('files', function(files) {
 		localStorage.setItem("files", files);
